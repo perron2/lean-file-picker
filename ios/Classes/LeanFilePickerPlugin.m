@@ -2,7 +2,7 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <objc/runtime.h>
 
-@interface LeanFilePickerPlugin ()<UIDocumentPickerDelegate, FlutterStreamHandler>
+@interface LeanFilePickerPlugin ()<UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate, FlutterStreamHandler>
 @end
 
 @implementation LeanFilePickerPlugin {
@@ -62,6 +62,7 @@
         initWithDocumentTypes:fileTypes
                        inMode:UIDocumentPickerModeImport];
     documentPicker.delegate = self;
+    documentPicker.presentationController.delegate = self;
     objc_setAssociatedObject(documentPicker, @"result", result, OBJC_ASSOCIATION_RETAIN);
 
     UIWindow *window = UIApplication.sharedApplication.delegate.window;
@@ -88,6 +89,12 @@
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
     FlutterResult result = objc_getAssociatedObject(controller, @"result");
+    result(nil);
+}
+
+- (void)presentationControllerDidDismiss:(UIPresentationController *)presentationController {
+    NSLog(@"The dismissal animation finished after the user swiped down.");
+    FlutterResult result = objc_getAssociatedObject(presentationController.presentedViewController, @"result");
     result(nil);
 }
 
